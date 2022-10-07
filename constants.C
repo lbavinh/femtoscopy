@@ -18,7 +18,7 @@ const std::map< Float_t, std::vector< UInt_t >  > MinBiasTrigger = {{3., {620052
 																	};
 
 // Event cuts
-const Double_t cutVtxR = 2.;                // Radial vertex cut
+const Double_t cutVtxR = 1.5;                // Radial vertex cut
 // const Double_t cutVtxZvpd = 3.;
 const Int_t cutNTofPoints = 1;
 const Double_t cutVpdVz = 3.;               // Difference between Vz and Vz estimated by VPD - cut apllied only for 200 GeV

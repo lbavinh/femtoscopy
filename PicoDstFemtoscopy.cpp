@@ -126,7 +126,8 @@ void PicoDstFemtoscopy(const Char_t *inFile = "", const Char_t *outFile = "", Fl
   // ================= Mix event configuration =================== //
   // ============================================================= //
   const int nBuffer = 5;  // length of the mixing buffer
-  const int nMyCent = 4;  // 0-10, 10-30, 30-50, 50-80
+  const int nMyCent = 1;
+  // const int nMyCent = 4;  // 0-10, 10-30, 30-50, 50-80
   const int nVtxZ = 1;    // for FXT
   std::list< vector< myPart > > mixBuf[nMyCent][nVtxZ];
   for (int ic(0);ic<nMyCent;ic++) {
@@ -299,7 +300,6 @@ void PicoDstFemtoscopy(const Char_t *inFile = "", const Char_t *outFile = "", Fl
     // else refmultCorrUtil->initEvent(event->fxtMult(),pVtx.Z(),event->ZDCx());
     // starCent = refmultCorrUtil->getCentralityBin9();
     // if (starCent < 0) continue; // bad centrality
-    hEvt->Fill(eventType[7], 1);
     // if      (starCent == 8 || starCent == 7) icent = 0; // 0-10%
     // else if (starCent == 6 || starCent == 5) icent = 1; // 10-30%
     // else if (starCent == 4 || starCent == 3) icent = 2; // 30-50%
@@ -325,7 +325,7 @@ void PicoDstFemtoscopy(const Char_t *inFile = "", const Char_t *outFile = "", Fl
       }
 
       // Centrality cuts                                              3.2 GeV
-      if      ( iFxtMult >  195 )    starCent = -1; // upper cut      287
+      if      ( iFxtMult >= 195 )    starCent = -1; // upper cut      287
       else if ( iFxtMult >= 142 )    starCent = 8;  // 0-5            205 
       else if ( iFxtMult >= 119 )    starCent = 7;  // 5-10           170 
       else if ( iFxtMult >= 86  )    starCent = 3;  // 10-20          118 
@@ -343,11 +343,15 @@ void PicoDstFemtoscopy(const Char_t *inFile = "", const Char_t *outFile = "", Fl
       else if (starCent == 2 || starCent == 1 || starCent == 0) icent = 3; // 50-80%
       else icent = -1;
       if (icent<0) continue;
-      if (icent >= (int) nMyCent || icent<0) {
+      // if (icent!=0) continue;
+      // if (icent >= (int) nMyCent || icent<0) {
+      if (icent >= (int) 4 || icent<0) {
         cerr << "Error: icent = " << icent << endl;
         exit(0);
       }
     }
+    // cout << icent << endl;
+    hEvt->Fill(eventType[7], 1);
 
 
     iVtxZ = -1;
@@ -364,118 +368,118 @@ void PicoDstFemtoscopy(const Char_t *inFile = "", const Char_t *outFile = "", Fl
     hVr->Fill(pVtx.X(),pVtx.Y());
     pion.clear();
     bField = event->bField();
-    for(Int_t iTrk=0; iTrk<nTracks; iTrk++) {
-      StPicoTrack *picoTrack = dst->track(iTrk);
-      StPicoBTofPidTraits *trait = dst->btofPidTraits(picoTrack->bTofPidTraitsIndex());
-      if (!picoTrack)                                          continue;
-      if (!picoTrack->isPrimary())                             continue;
-      if ( ( picoTrack -> dEdx() ) == 0. )                     continue;
-      if (picoTrack->nHitsFit() < cutNhits)                    continue;
-      // if ((Double_t)picoTrack->nHitsFit() / picoTrack->nHitsPoss() < cutNhitsRatio) continue;
-      // if (picoTrack->nHitsPoss() < cutNhitsPoss)              continue;
-      if (picoTrack->gDCA(pVtx).Mag() > cutDCA.at(colEnergy))  continue;
-      // Kinematic track cut
-      TVector3 mom = picoTrack->pMom();
-      if (!bFXT && TMath::Abs(mom.Eta()) > cutEta)             continue;
-      if ( bFXT && (mom.Eta() < cutEtaFTX || mom.Eta() > 0.) ) continue;
-      if (picoTrack->pPt() < cutPtMin.at(colEnergy) )          continue;
-      if (picoTrack->pPt() > cutPtMax)                         continue;
-      if (picoTrack->pPtot() < cutPtotMin)                     continue;
-      if (picoTrack->pPtot() > cutPMax)                        continue;
+    // for(Int_t iTrk=0; iTrk<nTracks; iTrk++) {
+    //   StPicoTrack *picoTrack = dst->track(iTrk);
+    //   StPicoBTofPidTraits *trait = dst->btofPidTraits(picoTrack->bTofPidTraitsIndex());
+    //   if (!picoTrack)                                          continue;
+    //   if (!picoTrack->isPrimary())                             continue;
+    //   if ( ( picoTrack -> dEdx() ) == 0. )                     continue;
+    //   if (picoTrack->nHitsFit() < cutNhits)                    continue;
+    //   // if ((Double_t)picoTrack->nHitsFit() / picoTrack->nHitsPoss() < cutNhitsRatio) continue;
+    //   // if (picoTrack->nHitsPoss() < cutNhitsPoss)              continue;
+    //   if (picoTrack->gDCA(pVtx).Mag() > cutDCA.at(colEnergy))  continue;
+    //   // Kinematic track cut
+    //   TVector3 mom = picoTrack->pMom();
+    //   if (!bFXT && TMath::Abs(mom.Eta()) > cutEta)             continue;
+    //   if ( bFXT && (mom.Eta() < cutEtaFTX || mom.Eta() > 0.) ) continue;
+    //   if (picoTrack->pPt() < cutPtMin.at(colEnergy) )          continue;
+    //   if (picoTrack->pPt() > cutPtMax)                         continue;
+    //   if (picoTrack->pPtot() < cutPtotMin)                     continue;
+    //   if (picoTrack->pPtot() > cutPMax)                        continue;
 
-      charge = picoTrack->charge();
-      pid = (charge>0) ? (GetPID(picoTrack, trait) + 1) : (GetPID(picoTrack, trait) + 5);
-      if (pid == 1) {
-        TVector3 mom = picoTrack->pMom();
-        ptot = mom.Mag();
-        pt = mom.Pt();
-        eta = mom.Eta();
-        phi = mom.Phi();
-        if (!picoTrack->isTofTrack()) hPiPtot_TPC_only->Fill(ptot);
-        else                          hPiPtot_TPC_TOF->Fill(ptot);
-        hPiPtot->Fill(ptot);
-        if (picoTrack->isTofTrack()) hPiM2pq->Fill(ptot, TMath::Power(ptot,2.)/(1./(1.-TMath::Power(trait->btofBeta(),2.))-1.));
-        hPidEdxpq->Fill(ptot, picoTrack->dEdx());
-        hPiEtaPt->Fill(mom.Perp(),mom.Eta());
-        // lrtzVecPi.SetXYZM(mom.Px(), mom.Py(), mom.Pz(), pion_mass);
-        lrtzVecPi.SetPtEtaPhiM(pt, eta, phi, pion_mass);
-        pion.push_back(myPart(lrtzVecPi, picoTrack->topologyMap(0), picoTrack->topologyMap(1), picoTrack->nHits(),picoTrack->helix(bField)));
-      } // if (pid == 1)
-      pt = mom.Pt();
-      eta = mom.Eta();
-      phi = mom.Phi();
-      lrtzVecPi.SetPtEtaPhiM(pt, eta, phi, pion_mass);
-      pion.push_back(myPart(lrtzVecPi, picoTrack->topologyMap(0), picoTrack->topologyMap(1), picoTrack->nHits(),picoTrack->helix(bField)));
-    } // for(Int_t iTrk=0; iTrk<nTracks; iTrk++)
+    //   charge = picoTrack->charge();
+    //   pid = (charge>0) ? (GetPID(picoTrack, trait) + 1) : (GetPID(picoTrack, trait) + 5);
+    //   if (pid == 1) {
+    //     TVector3 mom = picoTrack->pMom();
+    //     ptot = mom.Mag();
+    //     pt = mom.Pt();
+    //     eta = mom.Eta();
+    //     phi = mom.Phi();
+    //     if (!picoTrack->isTofTrack()) hPiPtot_TPC_only->Fill(ptot);
+    //     else                          hPiPtot_TPC_TOF->Fill(ptot);
+    //     hPiPtot->Fill(ptot);
+    //     if (picoTrack->isTofTrack()) hPiM2pq->Fill(ptot, TMath::Power(ptot,2.)/(1./(1.-TMath::Power(trait->btofBeta(),2.))-1.));
+    //     hPidEdxpq->Fill(ptot, picoTrack->dEdx());
+    //     hPiEtaPt->Fill(mom.Perp(),mom.Eta());
+    //     // lrtzVecPi.SetXYZM(mom.Px(), mom.Py(), mom.Pz(), pion_mass);
+    //     lrtzVecPi.SetPtEtaPhiM(pt, eta, phi, pion_mass);
+    //     pion.push_back(myPart(lrtzVecPi, picoTrack->topologyMap(0), picoTrack->topologyMap(1), picoTrack->nHits(),picoTrack->helix(bField)));
+    //   } // if (pid == 1)
+    //   pt = mom.Pt();
+    //   eta = mom.Eta();
+    //   phi = mom.Phi();
+    //   lrtzVecPi.SetPtEtaPhiM(pt, eta, phi, pion_mass);
+    //   pion.push_back(myPart(lrtzVecPi, picoTrack->topologyMap(0), picoTrack->topologyMap(1), picoTrack->nHits(),picoTrack->helix(bField)));
+    // } // for(Int_t iTrk=0; iTrk<nTracks; iTrk++)
 
-    if (pion.size()>=2) {
-      for (UInt_t iPion1(0); iPion1<pion.size(); iPion1++) {
-        for (UInt_t iPion2(iPion1+1); iPion2<pion.size(); iPion2++) {
-          qinv = - (pion.at(iPion1).m4Mom - pion.at(iPion2).m4Mom).M();
-          // qinv = TMath::Sqrt( - TMath::Power(pion.at(iPion1).m4Mom.Energy() - pion.at(iPion2).m4Mom.Energy(), 2.) + (pion.at(iPion1).m4Mom.Vect() - pion.at(iPion2).m4Mom.Vect()).Mag2() );
-          // cout << "qinv = " << qinv << "; qinv = " << (pion.at(iPion1).m4Mom.Vect() - pion.at(iPion2).m4Mom.Vect()).Mag() << endl;
-          hQinvNum[icent]->Fill(qinv);
-          splittingLevel = GetSpittingLevel(pion[iPion1],pion[iPion2]);
-          hSLNum[icent]->Fill(qinv,splittingLevel);
-          for (UInt_t iSL=0;iSL<nSL;iSL++) if (splittingLevel < SL[iSL]) hQinvNum_SL[icent][iSL]->Fill(qinv);
-          aveDist = GetAverageDistance(pion[iPion1],pion[iPion2]);
-          hADNum[icent]->Fill(qinv,aveDist);
-          pADNum[icent]->Fill(qinv,aveDist);
-          hDeltaRNum[icent]->Fill(aveDist);
-          for (UInt_t iSL=0;iSL<nSL;iSL++) if (splittingLevel < SL[iSL]) hDeltaRNum_SL[icent][iSL]->Fill(aveDist);
-          for (UInt_t iAD=0;iAD<nAD;iAD++) if (aveDist > AD[iAD]) {
-            hQinvNum_AD[icent][iAD]->Fill(qinv);
-            if (splittingLevel < SL[1]) hQinvNum_SL_AD[icent][iAD]->Fill(qinv);
-          } // for (UInt_t iAD=0;iAD<nAD;iAD++) if (aveDist > AD[iAD])
-          kt = Getkt(pion.at(iPion1).m4Mom.Vect(),pion.at(iPion2).m4Mom.Vect());
-          ikt = -1;
-          for (UInt_t j(0);j<nkt;j++) { if (kt>=ktBin[j] && kt<ktBin[j+1]) {ikt=j; break;} }
-          if (ikt!=-1) {
-            hSLNum_kt[icent][ikt]->Fill(qinv,splittingLevel);
-            hADNum_kt[icent][ikt]->Fill(qinv,aveDist);
-            hQinvNum_kt[icent][ikt]->Fill(qinv);
-            hDeltaRNum_kt[icent][ikt]->Fill(aveDist);
-          } // if (ikt!=-1)
-        } // for (UInt_t iPion2(0); iPion2<pionMom.size(); iPion2++)
-      } // for (UInt_t iPion1(0); iPion1<pionMom.size(); iPion1++)
-    } // if (pionMom.size()>=2)
+    // if (pion.size()>=2) {
+    //   for (UInt_t iPion1(0); iPion1<pion.size(); iPion1++) {
+    //     for (UInt_t iPion2(iPion1+1); iPion2<pion.size(); iPion2++) {
+    //       qinv = - (pion.at(iPion1).m4Mom - pion.at(iPion2).m4Mom).M();
+    //       // qinv = TMath::Sqrt( - TMath::Power(pion.at(iPion1).m4Mom.Energy() - pion.at(iPion2).m4Mom.Energy(), 2.) + (pion.at(iPion1).m4Mom.Vect() - pion.at(iPion2).m4Mom.Vect()).Mag2() );
+    //       // cout << "qinv = " << qinv << "; qinv = " << (pion.at(iPion1).m4Mom.Vect() - pion.at(iPion2).m4Mom.Vect()).Mag() << endl;
+    //       hQinvNum[icent]->Fill(qinv);
+    //       splittingLevel = GetSpittingLevel(pion[iPion1],pion[iPion2]);
+    //       hSLNum[icent]->Fill(qinv,splittingLevel);
+    //       for (UInt_t iSL=0;iSL<nSL;iSL++) if (splittingLevel < SL[iSL]) hQinvNum_SL[icent][iSL]->Fill(qinv);
+    //       aveDist = GetAverageDistance(pion[iPion1],pion[iPion2]);
+    //       hADNum[icent]->Fill(qinv,aveDist);
+    //       pADNum[icent]->Fill(qinv,aveDist);
+    //       hDeltaRNum[icent]->Fill(aveDist);
+    //       for (UInt_t iSL=0;iSL<nSL;iSL++) if (splittingLevel < SL[iSL]) hDeltaRNum_SL[icent][iSL]->Fill(aveDist);
+    //       for (UInt_t iAD=0;iAD<nAD;iAD++) if (aveDist > AD[iAD]) {
+    //         hQinvNum_AD[icent][iAD]->Fill(qinv);
+    //         if (splittingLevel < SL[1]) hQinvNum_SL_AD[icent][iAD]->Fill(qinv);
+    //       } // for (UInt_t iAD=0;iAD<nAD;iAD++) if (aveDist > AD[iAD])
+    //       kt = Getkt(pion.at(iPion1).m4Mom.Vect(),pion.at(iPion2).m4Mom.Vect());
+    //       ikt = -1;
+    //       for (UInt_t j(0);j<nkt;j++) { if (kt>=ktBin[j] && kt<ktBin[j+1]) {ikt=j; break;} }
+    //       if (ikt!=-1) {
+    //         hSLNum_kt[icent][ikt]->Fill(qinv,splittingLevel);
+    //         hADNum_kt[icent][ikt]->Fill(qinv,aveDist);
+    //         hQinvNum_kt[icent][ikt]->Fill(qinv);
+    //         hDeltaRNum_kt[icent][ikt]->Fill(aveDist);
+    //       } // if (ikt!=-1)
+    //     } // for (UInt_t iPion2(0); iPion2<pionMom.size(); iPion2++)
+    //   } // for (UInt_t iPion1(0); iPion1<pionMom.size(); iPion1++)
+    // } // if (pionMom.size()>=2)
 
-    // ============================================================= //
-    // ========================= Mix event ========================= //
-    // ============================================================= //
-    if (pion.size()>=1) { // There must be at least 1 pion to do the mixing
-      for (const vector<myPart> & previousEvent : mixBuf[icent][iVtxZ]) { // loop over the buffer
-        for (auto &mixPion : previousEvent) { // loop over the pions from previous event
-          for (auto &pionFromThisEvent : pion) { // loop over the pions from this event
-            qinv = -(pionFromThisEvent.m4Mom-mixPion.m4Mom).M();
-            hQinvDen[icent]->Fill(qinv);
-            splittingLevel = GetSpittingLevel(pionFromThisEvent, mixPion);
-            hSLDen[icent]->Fill(qinv,splittingLevel);
-            for (UInt_t iSL=0;iSL<nSL;iSL++) if (splittingLevel < SL[iSL]) hQinvDen_SL[icent][iSL]->Fill(qinv);
-            aveDist = GetAverageDistance(pionFromThisEvent,mixPion);
-            hADDen[icent]->Fill(qinv,aveDist);
-            pADDen[icent]->Fill(qinv,aveDist);
-            hDeltaRDen[icent]->Fill(aveDist);
-            for (UInt_t iSL=0;iSL<nSL;iSL++) if (splittingLevel < SL[iSL]) hDeltaRDen_SL[icent][iSL]->Fill(aveDist);
-            for (UInt_t iAD=0;iAD<nAD;iAD++) if (aveDist > AD[iAD]) {
-              hQinvDen_AD[icent][iAD]->Fill(qinv);
-              if (splittingLevel < SL[1]) hQinvDen_SL_AD[icent][iAD]->Fill(qinv);
-            } // for (UInt_t iAD=0;iAD<nAD;iAD++) if (aveDist > AD[iAD])
-            kt = Getkt(pionFromThisEvent.m4Mom.Vect(),mixPion.m4Mom.Vect());
-            ikt = -1;
-            for (UInt_t j(0);j<nkt;j++) { if (kt>=ktBin[j] && kt<ktBin[j+1]) {ikt=j; break;} }
-            if (ikt!=-1) {
-              hSLDen_kt[icent][ikt]->Fill(qinv,splittingLevel);
-              hADDen_kt[icent][ikt]->Fill(qinv,aveDist);
-              hQinvDen_kt[icent][ikt]->Fill(qinv);
-              hDeltaRDen_kt[icent][ikt]->Fill(aveDist);
-            } // if (ikt!=-1)
-          } // for (auto &pionFromThisEvent : pion)
-        } // for (auto &mixPion : previousEvent)
-      } // for (const vector<myPart> & previousEvent : mixBuf[icent][iVtxZ])
-      mixBuf[icent][iVtxZ].push_front(pion);
-      if (mixBuf[icent][iVtxZ].size() > nBuffer) mixBuf[icent][iVtxZ].pop_back();
-    } // if (pion.size()>=1) 
+    // // ============================================================= //
+    // // ========================= Mix event ========================= //
+    // // ============================================================= //
+    // if (pion.size()>=1) { // There must be at least 1 pion to do the mixing
+    //   for (const vector<myPart> & previousEvent : mixBuf[icent][iVtxZ]) { // loop over the buffer
+    //     for (auto &mixPion : previousEvent) { // loop over the pions from previous event
+    //       for (auto &pionFromThisEvent : pion) { // loop over the pions from this event
+    //         qinv = -(pionFromThisEvent.m4Mom-mixPion.m4Mom).M();
+    //         hQinvDen[icent]->Fill(qinv);
+    //         splittingLevel = GetSpittingLevel(pionFromThisEvent, mixPion);
+    //         hSLDen[icent]->Fill(qinv,splittingLevel);
+    //         for (UInt_t iSL=0;iSL<nSL;iSL++) if (splittingLevel < SL[iSL]) hQinvDen_SL[icent][iSL]->Fill(qinv);
+    //         aveDist = GetAverageDistance(pionFromThisEvent,mixPion);
+    //         hADDen[icent]->Fill(qinv,aveDist);
+    //         pADDen[icent]->Fill(qinv,aveDist);
+    //         hDeltaRDen[icent]->Fill(aveDist);
+    //         for (UInt_t iSL=0;iSL<nSL;iSL++) if (splittingLevel < SL[iSL]) hDeltaRDen_SL[icent][iSL]->Fill(aveDist);
+    //         for (UInt_t iAD=0;iAD<nAD;iAD++) if (aveDist > AD[iAD]) {
+    //           hQinvDen_AD[icent][iAD]->Fill(qinv);
+    //           if (splittingLevel < SL[1]) hQinvDen_SL_AD[icent][iAD]->Fill(qinv);
+    //         } // for (UInt_t iAD=0;iAD<nAD;iAD++) if (aveDist > AD[iAD])
+    //         kt = Getkt(pionFromThisEvent.m4Mom.Vect(),mixPion.m4Mom.Vect());
+    //         ikt = -1;
+    //         for (UInt_t j(0);j<nkt;j++) { if (kt>=ktBin[j] && kt<ktBin[j+1]) {ikt=j; break;} }
+    //         if (ikt!=-1) {
+    //           hSLDen_kt[icent][ikt]->Fill(qinv,splittingLevel);
+    //           hADDen_kt[icent][ikt]->Fill(qinv,aveDist);
+    //           hQinvDen_kt[icent][ikt]->Fill(qinv);
+    //           hDeltaRDen_kt[icent][ikt]->Fill(aveDist);
+    //         } // if (ikt!=-1)
+    //       } // for (auto &pionFromThisEvent : pion)
+    //     } // for (auto &mixPion : previousEvent)
+    //   } // for (const vector<myPart> & previousEvent : mixBuf[icent][iVtxZ])
+    //   mixBuf[icent][iVtxZ].push_front(pion);
+    //   if (mixBuf[icent][iVtxZ].size() > nBuffer) mixBuf[icent][iVtxZ].pop_back();
+    // } // if (pion.size()>=1) 
 
   } //for(Long64_t iEvent=0; iEvent<events2read; iEvent++)
   picoReader->Finish();
